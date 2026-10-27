@@ -680,7 +680,7 @@ body.cerrado{overflow:hidden;height:100%}
 
   // Música: arranca al tocar el sobre (los celulares lo exigen) y entra suave
   var musica=document.getElementById('musica'), btnSon=document.getElementById('sonido');
-  function subir(){ var v=0; musica.volume=0; var t=setInterval(function(){ v+=0.05; if(v>=0.8){v=0.8;clearInterval(t);} musica.volume=v; },90); }
+  function subir(){ var v=0; musica.volume=0; var t=setInterval(function(){ v+=0.2; if(v>=0.8){v=0.8;clearInterval(t);} musica.volume=v; },60); }
   function sonar(){ if(!musica) return; var pr=musica.play(); if(pr&&pr.then){ pr.then(subir).catch(function(){ btnSon.classList.add('mudo'); btnSon.setAttribute('aria-label','Reproducir música'); }); } else subir(); }
   if(btnSon) btnSon.addEventListener('click',function(){
     if(musica.paused){ sonar(); btnSon.classList.remove('mudo'); btnSon.setAttribute('aria-label','Pausar música'); }
