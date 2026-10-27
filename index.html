@@ -385,6 +385,22 @@ body.cerrado{overflow:hidden;height:100%}
 .regalo h3{font-family:var(--f-display);font-weight:600;font-size:clamp(18px,5vw,22px);margin:0;color:#fff}
 .regalo p{margin:0;font-size:clamp(17px,4.6vw,20px);line-height:1.45;color:var(--crema);max-width:30ch}
 .regalo .lluvia{font-family:var(--f-script);font-size:clamp(30px,9vw,40px);line-height:1;color:var(--oro-c);margin-top:4px}
+
+/* Música */
+.sonido{
+  position:fixed;z-index:30;
+  right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  width:48px;height:48px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;
+  color:#2a1c04;background:linear-gradient(180deg,#ffe08a,var(--oro-v) 55%,#e0a92e);
+  box-shadow:0 8px 20px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.6);
+  opacity:0;transform:scale(.6);pointer-events:none;transition:opacity .5s ease 1.4s, transform .5s ease 1.4s
+}
+.abriendo .sonido{opacity:1;transform:none;pointer-events:auto}
+.sonido:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.sonido .off{display:none}
+.sonido.mudo .on{display:none}
+.sonido.mudo .off{display:block}
+.sonido:not(.mudo)::after{content:"";position:absolute;inset:-4px;border-radius:50%;box-shadow:0 0 0 0 rgba(255,207,77,.5);animation:pulso 2.4s ease-out infinite}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition-duration:.01s!important;transition-delay:0s!important}
 }
@@ -459,7 +475,7 @@ body.cerrado{overflow:hidden;height:100%}
 
       <div class="ruta">
         <div class="ruta-avance" aria-hidden="true"></div>
-        <div class="avion" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></div>
+        <div class="avion helico" aria-hidden="true"><svg viewBox="0 0 24 24"><g fill="currentColor"><rect x="4" y="4.6" width="19" height="1.3" rx=".65"/><rect x="13.4" y="5.6" width="1.3" height="2.4"/><ellipse cx="14.2" cy="11" rx="5.2" ry="3.4"/><rect x="1.8" y="9.9" width="9" height="1.5" rx=".7"/><rect x="1.2" y="7.4" width="1.5" height="5.2" rx=".7"/><rect x="11.4" y="13.6" width=".9" height="3"/><rect x="16.4" y="13.6" width=".9" height="3"/><rect x="9.4" y="16.3" width="10.4" height="1.1" rx=".55"/></g><path d="M15.5 8.6a3.6 3.6 0 0 1 3.4 2.4h-3.4z" fill="#0a1630" opacity=".55"/></svg></div>
 
         <article class="hito" data-bgx="50%" data-bgy="35%" data-bgs="1.06">
           <div class="hito-fecha">5 de enero de 2023</div>
@@ -643,6 +659,13 @@ body.cerrado{overflow:hidden;height:100%}
   </section>
 </main>
 
+
+<audio id="musica" src="musica.mp3" preload="auto" loop></audio>
+<button class="sonido" id="sonido" type="button" aria-label="Pausar música">
+  <svg class="on" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+  <svg class="off" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
+</button>
+
 <script>
 (function(){
   var body=document.body, sobre=document.getElementById('sobre'), abierto=false;
@@ -654,6 +677,16 @@ body.cerrado{overflow:hidden;height:100%}
     setTimeout(function(){ body.classList.add('abierto'); body.classList.remove('cerrado'); }, reduce?50:2100);
   }
   sobre.addEventListener('click',abrir);
+
+  // Música: arranca al tocar el sobre (los celulares lo exigen) y entra suave
+  var musica=document.getElementById('musica'), btnSon=document.getElementById('sonido');
+  function subir(){ var v=0; musica.volume=0; var t=setInterval(function(){ v+=0.05; if(v>=0.8){v=0.8;clearInterval(t);} musica.volume=v; },90); }
+  function sonar(){ if(!musica) return; var pr=musica.play(); if(pr&&pr.then){ pr.then(subir).catch(function(){ btnSon.classList.add('mudo'); btnSon.setAttribute('aria-label','Reproducir música'); }); } else subir(); }
+  if(btnSon) btnSon.addEventListener('click',function(){
+    if(musica.paused){ sonar(); btnSon.classList.remove('mudo'); btnSon.setAttribute('aria-label','Pausar música'); }
+    else { musica.pause(); btnSon.classList.add('mudo'); btnSon.setAttribute('aria-label','Reproducir música'); }
+  });
+  sobre.addEventListener('click',sonar);
 })();
 
 (function(){
